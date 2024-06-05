@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taming the Beast: Unleashing the Power of PySpark SQL for Data Filtering</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="prism.css">
+    <script src="prism.js"></script>
+</head>
+
+<body>
+        <header>
+            <h1>Julia Hagen</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                </ul>
+            </nav>
+        </header>
+    <div id="blog-posts-container">
+    <article class="blog-post">
+        <h1 class="post-title">Taming the Beast: Unleashing the Power of PySpark SQL for Data Filtering</h1>
+        <p class="post-date"> May 28, 2024 2:45 PM</p>
+        <div class="post-tags"><span class="tag">🐼 Pandas</span><span class="tag">✨ PySpark</span><span class="tag">🗃️
+                Filtering</span></div>
+
+        <section class="post-content">
+            <div class="tldr">
+                <a href="#tldr">📌 TL;DR </a>
+            </div>         
+            <p>SQL is the language of databases, Python the language of Machine Learning. Lucky for us Pyspark is a mix optimised for both.</p>
+
+<p><a href="pyspark_filtering_1.html">“PySpark vs. Pandas: An Introduction to Filtering”</a> introduced the basic methods and syntax of filtering in Pyspark but we didn’t go where the real power lies: Complex filtering tasks. Stuff where SQL is neat.</p>
+
+<p>In addition you get the data-manipulation capabilities of Python, which you would lack in a standard SQL ETL interface. Considering most companies also don’t like it when each and every employee starts writing about in their datalake, most enterprise SQL interfaces are read-only to a good portion of employees, significantly reducing capabilities. PySpark gives you the capabilities of SQL while seamlessly integrating into an interface where you can continue working with the obtained results.</p>
+
+<p>This is where Pyspark’s edge is. It natively supports complex SQL-based query styles for rich detail-oriented data access and seamlessly integrating the results into a data concept which allows sophisticated mathematical operations and further processing with i.e. python. I am yet to learn about a comparable duo of language and interface.</p>
+
+<p>Let’s do 3 examples which illustrate the Pyspark-SQL symbiosis.</p>
+
+<h2>Example 1: Filtering Based on Multiple Conditions and Aggregate Functions</h2>
+
+<p>Suppose we have a DataFrame containing sales data with columns: <code>product_id</code>, <code>category</code>, <code>price</code>, <code>quantity_sold</code>, and <code>sale_date</code>. We want to filter products that belong to specific categories, have an average sale price above a certain threshold, and have been sold in quantities greater than a dynamic value calculated based on the total sales of each product.</p>
+
+<pre class="code"><code class="language-python">from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, avg, sum
+
+# Initialize Spark session
+spark = SparkSession.builder.appName("ComplexFiltering").getOrCreate()
+
+# Sample DataFrame
+data = [
+    (1, 'Electronics', 299.99, 3, '2024-05-01'),
+    (2, 'Clothing', 19.99, 10, '2024-05-02'),
+    (3, 'Electronics', 499.99, 2, '2024-05-01'),
+    (4, 'Furniture', 999.99, 1, '2024-05-03'),
+    (5, 'Clothing', 49.99, 20, '2024-05-01')
+]
+columns = ['product_id', 'category', 'price', 'quantity_sold', 'sale_date']
+
+df = spark.createDataFrame(data, columns)
+
+# Filtering conditions
+categories = ['Electronics', 'Clothing']
+avg_price_threshold = 50
+dynamic_quantity_threshold = 5
+
+# Filter DataFrame using multiple conditions and aggregate functions
+filtered_df = df.filter(
+    (col('category').isin(categories)) &
+    (col('price') > avg_price_threshold)
+).groupBy('product_id').agg(
+    avg('price').alias('avg_price'),
+    sum('quantity_sold').alias('total_quantity')
+).filter(
+    (col('avg_price') > avg_price_threshold) &
+    (col('total_quantity') > dynamic_quantity_threshold)
+)
+
+filtered_df.show()</code></pre>
+
+<h3>PySpark Concepts Explained:</h3>
+
+<p>While this isn’t totally out-of-the box, there’s something uniquely PySparkian behind the efficient use of aggregate functions.</p>
+
+<p>PySpark leverages aggregate functions such as <code>avg()</code> and <code>sum()</code> in combination with the <code>groupBy()</code> method to perform calculations on grouped data. In the context of filtering, this allows for filtering based on the results of these aggregate functions. They’re standard SQL methods, that exist across programming languages. While pandas provides similar capabilities through <code>groupby()</code> and aggregation methods like <code>.mean()</code> and <code>.sum()</code>, the execution in pandas is often less efficient for large datasets. PySpark’s distributed nature ensures that even large-scale operations are executed quickly by parallelizing the workload across multiple machines.</p>
+
+<p>Pyspark natively uses distributed computing capabilities and something called <strong>lazy evaluation</strong>.</p>
+
+<h3>Lazy Evaluation in PySpark:</h3>
+
+<p>Lazy evaluation is a fundamental concept in PySpark where transformations on data are not immediately executed when they are called. Instead, PySpark builds an execution plan, or a Directed Acyclic Graph (DAG) of transformations. Actual computation is deferred until an action (e.g., <code>count()</code>, <code>collect()</code>, <code>show()</code>) is called, triggering the execution of the planned transformations. This allows PySpark to optimize the execution plan, eliminating unnecessary computations and combining multiple operations to improve performance.</p>
+
+<p><strong> Why Lazy Evaluation is Superior to Eager Evaluation (like in Pandas):</p></strong>
+
+<p>In pandas, operations are executed immediately when they are called, known as eager evaluation. While this can be simpler for small datasets, it can lead to inefficiencies in terms of both computation and memory usage. Each intermediate step generates a new DataFrame, which can be costly for large datasets.</p>
+
+<p><strong> Why is this important for filtering?</p></strong>
+
+<p>This is crucial for filtering. Let’s look at the example again.</p>
+
+<pre class="code"><code class="language-python"># Suboptimal order of operations (see lazy evaluation) 
+# 1. Perform aggregation first
+# 2. Then apply the filter on aggregated results
+aggregated_df = df.groupBy('product_id').agg(
+    avg('price').alias('avg_price'),
+    sum('quantity_sold').alias('total_quantity')
+)
+
+filtered_df = aggregated_df.filter(
+    (col('avg_price') > avg_price_threshold) &
+    (col('total_quantity') > dynamic_quantity_threshold)
+)
+
+# Further filter based on original conditions
+final_filtered_df = df.filter(
+    (col('category').isin(categories)) &
+    (col('price') > avg_price_threshold)
+).join(filtered_df, on='product_id')
+
+# Action that triggers the execution
+final_filtered_df.show()</code></pre>
+
+<p> <strong>What does lazy evaluation do?</strong></p>
+
+<p>PySpark builds an execution plan as transformations are defined, but these transformations are not executed until an action is called. In this example, <code>final_filtered_df.show()</code> is the action that triggers the execution of all preceding transformations.</p>
+
+<p> <strong>Optimization by PySpark:</strong></p>
+
+<p>Despite the code being written in a suboptimal order (aggregation before filtering), PySpark’s Catalyst optimizer will analyze the entire execution plan and rearrange the operations to minimize computational cost. Specifically, it will:</p>
+<ol>
+    <li>Push down the filters as close to the data source as possible to reduce the size of the intermediate datasets.</li>
+    <li>Perform the filter on the original DataFrame before aggregation to minimize the number of rows processed in the aggregation step.</li>
+</ol>
+
+<p><strong>Operational Cost Savings:</strong></p>
+
+<p>By filtering the DataFrame early in the execution plan, PySpark reduces the number of rows that need to be aggregated, which saves computational resources. This optimization is automatically handled by PySpark’s Catalyst optimizer, demonstrating the power of lazy evaluation and query optimization.</p>
+
+<p>In contrast, in pandas, each operation would be executed immediately as it is called, potentially leading to inefficiencies if the operations are not manually arranged in an optimal order. PySpark’s ability to optimize the execution plan transparently provides a significant advantage for large-scale data processing.</p>
+
+<hr class="custom-separator">
+
+<h2>Example 2: Dynamic Date Range Filtering with Window Functions</h2>
+
+<p>Suppose we have a DataFrame containing user activity logs with columns: <code>user_id</code>, <code>activity</code>, <code>timestamp</code>. We want to filter users who have been active for a specific period dynamically calculated based on their first and last activity dates.</p>
+
+<pre class="code"><code class="language-python">from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, min, max, datediff
+from pyspark.sql.window import Window
+
+# Initialize Spark session
+spark = SparkSession.builder.appName("ComplexFiltering").getOrCreate()
+
+# Sample DataFrame
+data = [
+    (1, 'login', '2024-05-01'),
+    (1, 'purchase', '2024-05-03'),
+    (2, 'login', '2024-05-02'),
+    (2, 'logout', '2024-05-03'),
+    (3, 'login', '2024-05-01'),
+    (3, 'purchase', '2024-05-05'),
+    (3, 'logout', '2024-05-10')
+]
+columns = ['user_id', 'activity', 'timestamp']
+
+df = spark.createDataFrame(data, columns)
+
+# Convert timestamp to date type
+df = df.withColumn('timestamp', col('timestamp').cast('date'))
+
+# Window specification for user activity date range
+window_spec = Window.partitionBy('user_id')
+
+# Calculate first and last activity dates
+activity_range_df = df.withColumn('first_activity', min('timestamp').over(window_spec)) \\
+                      .withColumn('last_activity', max('timestamp').over(window_spec))
+
+# Define dynamic active period threshold (e.g., active for more than 3 days)
+active_period_threshold = 3
+
+# Filter users based on dynamic active period
+filtered_df = activity_range_df.filter(
+    datediff(col('last_activity'), col('first_activity')) > active_period_threshold
+).select('user_id', 'activity', 'timestamp')
+
+filtered_df.show()</code></pre>
+
+<h3>PySpark Concepts Explained:</h3>
+
+<p>Window functions - like the name suggests - can be visualised like paper cutout you slide across your table. Functions are only called on the data appearing within the window. This allows sophisticated relative filtering operations. It’s literally a data-window.</p>
+
+<p>Window functions in PySpark, such as <code>min()</code> and <code>max()</code>, operate within a specified window that considers the relative positioning of data within a partition.</p>
+
+<p>Relative positioning can be as fine- or coarse-grained as desired. Looking at the example again let's break down exactly how and where the window is defined and used.</p>
+
+<h4>Step 1: Define the Window Specification</h4>
+
+<pre class="code"><code class="language-python">from pyspark.sql import Window
+
+# Window specification for user activity date range
+window_spec = Window.partitionBy('user_id')</code></pre>
+
+<p><strong>Explanation:</strong></p>
+<ul>
+    <li><code>Window.partitionBy('user_id')</code>: This line defines a window specification (<code>window_spec</code>) that partitions the data by the <code>user_id</code> column. This means that the window functions defined later will operate on each <code>user_id</code> independently. Each partition will contain all rows corresponding to a particular <code>user_id</code>.</li>
+</ul>
+
+<h4>Step 2: Calculate First and Last Activity Dates</h4>
+
+<pre class="code"><code class="language-python">from pyspark.sql.functions import min, max
+
+# Calculate first and last activity dates
+activity_range_df = df.withColumn('first_activity', min('timestamp').over(window_spec)) \\
+                      .withColumn('last_activity', max('timestamp').over(window_spec))</code></pre>
+
+<p><strong>Explanation:</strong></p>
+<ul>
+    <li><code>min('timestamp').over(window_spec)</code>: This calculates the minimum value of the <code>timestamp</code> column within each partition defined by <code>window_spec</code>. The result is stored in a new column <code>first_activity</code>.</li>
+    <li><code>max('timestamp').over(window_spec)</code>: Similarly, this calculates the maximum value of the <code>timestamp</code> column within each partition and stores the result in a new column <code>last_activity</code>.</li>
+</ul>
+
+<p>By using the <code>over(window_spec)</code> method, these window functions are applied to each group of rows sharing the same <code>user_id</code>.</p>
+
+<h4>Step 3: Define the Active Period Threshold</h4>
+
+<pre class="code"><code class="language-python">from pyspark.sql.functions import datediff, col
+
+# Define dynamic active period threshold (e.g., active for more than 3 days)
+active_period_threshold = 3</code></pre>
+
+<p><strong>Explanation:</strong></p>
+<ul>
+    <li>Here, a variable <code>active_period_threshold</code> is set to 3 days. This will be used as a criterion to filter users based on the duration of their activity.</li>
+</ul>
+
+<h4>Step 4: Filter Users Based on Dynamic Active Period</h4>
+
+<pre class="code"><code class="language-python"># Filter users based on dynamic active period
+filtered_df = activity_range_df.filter(
+    datediff(col('last_activity'), col('first_activity')) > active_period_threshold
+).select('user_id', 'activity', 'timestamp')</code></pre>
+
+<p><strong>Explanation:</strong></p>
+<ul>
+    <li><code>datediff(col('last_activity'), col('first_activity'))</code>: This calculates the difference in days between the <code>last_activity</code> and <code>first_activity</code> columns for each row.</li>
+    <li><code>.filter(datediff(col('last_activity'), col('first_activity')) > active_period_threshold)</code>: This filters the DataFrame to include only those rows where the difference in days is greater than the <code>active_period_threshold</code> (3 days in this case).</li>
+    <li><code>.select('user_id', 'activity', 'timestamp')</code>: This selects the relevant columns for the final result.</li>
+</ul>
+
+<h4>Step 5: Trigger Execution</h4>
+
+<pre class="code"><code class="language-python"># Action that triggers the execution
+filtered_df.show()</code></pre>
+
+<p><strong>Explanation:</strong></p>
+<ul>
+    <li><code>filtered_df.show()</code>: This action triggers the execution of all the lazy transformations (this should ring a bell from Example 1) defined previously. The DataFrame is filtered based on the active period threshold, and the resulting rows are displayed.</li>
+</ul>
+
+<h3>Why is this important for filtering?</h3>
+
+<p>Window functions allow for operations across a set of table rows that are somehow related to the current row, making them ideal for tasks like calculating running totals, moving averages, or filtering based on dynamic criteria. This is particularly useful for tasks that require dynamic filtering based on a range of values within groups.</p>
+
+<h3>Pyspark vs. Pandas: Window Functions</h3>
+
+<p>In pandas, while window functions exist, they do not natively support distributed computation, which limits their scalability. PySpark’s window functions operate on DataFrames distributed across a cluster, ensuring efficient computation even for large datasets.</p>
+
+<p>Dynamic filtering and the use of window functions in PySpark provide a significant advantage over pandas by enabling complex, context-aware operations that are efficiently executed in a distributed environment. Pandas can perform similar operations using its <code>rolling()</code> or <code>expanding()</code> functions, but these can be slower and more memory-intensive due to pandas' single-threaded nature.</p>
+
+<hr class="custom-separator">
+
+<h2>Example 3: Complex Conditional Filtering with Subqueries</h2>
+
+<p>Suppose we have a DataFrame with order details containing columns: <code>order_id</code>, <code>customer_id</code>, <code>order_date</code>, <code>total_amount</code>, and <code>status</code>. We want to filter orders based on complex conditions such as the customer's total spending exceeding a threshold, orders placed in a specific date range, and excluding certain statuses.</p>
+
+<pre class="code"><code class="language-python">from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, sum
+
+# Initialize Spark session
+spark = SparkSession.builder.appName("ComplexFiltering").getOrCreate()
+
+# Sample DataFrame
+data = [
+    (1, 101, '2024-01-15', 150.0, 'completed'),
+    (2, 102, '2024-02-20', 200.0, 'completed'),
+    (3, 101, '2024-03-10', 300.0, 'pending'),
+    (4, 103, '2024-01-25', 500.0, 'completed'),
+    (5, 102, '2024-02-28', 100.0, 'cancelled'),
+    (6, 101, '2024-03-05', 250.0, 'completed')
+]
+columns = ['order_id', 'customer_id', 'order_date', 'total_amount', 'status']
+
+df = spark.createDataFrame(data, columns)
+
+# Convert order_date to date type
+df = df.withColumn('order_date', col('order_date').cast('date'))
+
+# Define conditions
+date_range_start = '2024-01-01'
+date_range_end = '2024-03-31'
+total_spending_threshold = 400
+excluded_statuses = ['cancelled']
+
+# Subquery to calculate total spending per customer
+customer_spending_df = df.groupBy('customer_id').agg(
+    sum('total_amount').alias('total_spending')
+).filter(col('total_spending') > total_spending_threshold)
+
+# Filter orders based on complex conditions
+filtered_df = df.join(customer_spending_df, on='customer_id') \\
+    .filter(
+        (col('order_date') >= date_range_start) &
+        (col('order_date') <= date_range_end) &
+        (~col('status').isin(excluded_statuses))
+    )
+
+filtered_df.show()</code></pre>
+
+<h3>PySpark Concepts Explained:</h3>
+
+<p>Subqueries are no complex concept but build on standard SQL workflow. They serve to create intermediate results that can be referenced in subsequent queries. This is akin to creating temporary tables in SQL, which can then be used to filter the main dataset, reducing later workload and processing times.</p>
+
+<h3>Pyspark vs. Pandas: Subqueries</h3>
+
+<p>Using subqueries in PySpark provides a powerful mechanism for complex filtering that involves multiple levels of data aggregation and filtering. PySpark's SQL capabilities allow for embedding subqueries within filtering operations, making the code more readable and efficient. In addition subqueries can be seamlessly integrated into the DataFrame API, rendering them a standard operation in the toolkit. In contrast, pandas often requires chaining multiple operations - like joining or merging - together to achieve similar results, which can become complex and harder to maintain. Additionally, the performance in pandas can degrade significantly with larger datasets due to its in-memory, single-threaded execution model (again cue: Lazy Evaluation).</p>
+
+<hr class="custom-separator">
+<figure class="callout block-color-tldr">
+    <div id="tldr" class="icon">📌</div>
+    <div class="callout-content">
+<strong>TL;DR</strong>
+
+<p>PySpark operations on the principle: Python+SQL = power.</p>
+
+<p>The combination has the ability perform sophisticated analyses and seamlessly integrate results into further Python processing. This makes it very attractive for the sheer amount of data and complexity of tasks in most commercial settings. While the Pythonic possibilities for processing and manipulating data remain PsySpark adds SQL capabilities for detail rich yet efficient access to data.</p>
+
+<p><strong>Lazy evaluation</strong> ensures that only necessary computations are performed, saving resources and time by filtering data before applying complex calculations. This means PySpark excels at filtering on multiple conditions combined with aggregate functions. (Example 1)</p>
+
+<p><strong>Window Functions</strong> enable advanced operations like running totals and moving averages within partitions of data. Again PySpark’s lazy evaluation optimizes these dynamic, context-aware computations, making them efficient even on large datasets. (Example 2)</p>
+
+<p><strong>Subqueries</strong> allow for intricate filtering involving multiple data layers. PySpark’s ability to embed subqueries within main queries (coupled with its lazy evaluation) ensures efficient execution of complex tasks, outperforming pandas in handling large-scale data processing.</p>
+
+
+</div>
+</figure>
+ </section>
+</article>
+</div>
+<footer>
+    <p>&copy; 2024 Julia Hagen. All rights reserved.</p>
+</footer>
+
+</body>
+
+</html>

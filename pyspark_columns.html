@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Columns, Rows and Working with Them</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="prism.css">
+    <script src="prism.js"></script>
+</head>
+
+<body>
+    <header>
+        <h1>Julia Hagen</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div id="blog-posts-container">
+    <article class="blog-post">
+        <h1 class="post-title">Columns, Rows and Working with Them</h1>
+        <p class="post-date"> April 22, 2023 2:15 PM</p>
+        <div class="post-tags"><span class="tag">🐼 Pandas</span><span class="tag">✨ PySpark</span><span class="tag">🗃️
+                Filtering</span></div>
+
+        <section class="post-content">
+
+            <div class="tldr">
+                <a href="#tldr">📌 TL;DR </a>
+            </div>            
+
+            <p>In Pandas working with columns is very intuitive. We can access anything stored inside a column, change
+                its values or its name and perform filtering with the same syntax. </p>
+            <p>I've previously made a point in stressing that indices are at the core of pandas-functionality and not
+                shared by PySpark. Crucially if you red a row in a pandas dataframe you get a list, if you do the same
+                in PySpark you get a Row Object (see <a href="pyspark_dataframes.html#row-object">here</a>). Some things
+                just need different handling in PySpark and accessing values inside a dataframe is one of them. </p>
+
+
+
+            <p>We have talked about the differences between <a href="pyspark_overview.html#dfs-1">Pandas and Pyspark</a>
+                before. </p>
+            <blockquote class="block-color-gray"><strong>Recall: </strong><br />Pandas have a matrix structure at its
+                core. Every row is assigned a fixed index between 1-n. For columns it is 1-m. By combining these indices
+                every value has a fixed position (n,m). <br />Pyspark uses relational databases i.e. tables instead. You
+                can think of this structure as rows with attributes (columns). Thus, referencing by column becomes a
+                little less intuitive. Column values can only be accessed via the row, which has been assigned a certain
+                value for this attribute. <br /></blockquote>
+            <p>To select a column and do operations on it like changing its name or values we have two different
+                operators: <code>select</code> and <code>withColumn</code>. Let’s dive in. </p>
+
+
+            <strong>A note on notation: </strong>
+            <p>In PySpark, there are several ways to reference a column when working with DataFrames. They sound and
+                look different - and granted - under the hood they call different modules and if you were to check they
+                do have different runtimes, however, they hardly differ significantly.
+                The point is:</p>
+            <p id="non-iterable-column"> <strong> They all return the same thing: A Column Object. This is, Crucially,
+                    different from a list. Why? Because Column Objects are not iterable (no index, no
+                    iteration).</strong></p>
+            <p> We will go into detail <a href="#column-object">below</a>. </p>
+            <p>Here&#x27;s a list of common methods to access columns, along with examples:</p>
+            <figure class="callout block-color-gray_background">
+                <div style="width:100%">
+                    <ol type="1">
+                        <li><strong>Dot notation:</strong></li>
+                    </ol>
+                    <p>Using the dot notation, you can access a column directly as an attribute of the DataFrame.
+                        However, this method is not recommended for production code, as it might not work for column
+                        names with special characters or spaces.</p>
+                    <pre
+                        class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">df.Age</code></pre>
+                    <ol type="1" start="2">
+                        <li><strong>Brackets:</strong></li>
+                    </ol>
+                    <p>You can use brackets to reference a column by its name, similar to how you would access an item
+                        in a dictionary. This method is more flexible, as it supports column names with special
+                        characters and spaces. It may also revoke memories of Pandas.</p>
+                    <pre
+                        class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">df[&quot;Age&quot;]</code></pre>
+                    <ol type="1" start="3">
+                        <li><strong>Col():</strong></li>
+                    </ol>
+                    <p>The <code>col()</code> function from the <code>pyspark.sql.functions</code> module allows you to
+                        create a column expression. This method is useful for more complex operations and when you need
+                        to reference columns in a more programmatic way.</p>
+                    <pre class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">from pyspark.sql.functions import col
+
+col(&quot;Age&quot;)</code></pre>
+                    <ol type="1" start="4">
+                        <li><strong>Column():</strong></li>
+                    </ol>
+                    <p>You can reference a Column directly using the <code>Column()</code> constructor. </p>
+                    <pre class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">from pyspark.sql.column import Column
+
+Column(&quot;Age&quot;)</code></pre>
+                    <ol type="1" start="5">
+                        <li><strong>Using <code>select()</code>:</strong></li>
+                    </ol>
+                    <p>Access a column in Pyspark using <code>select</code> statements, wich are essentially a mix of
+                        SQL and Python. <code>select</code> is also important for filtering. </p>
+                    <pre class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">#Access column_A
+    column_A = df.select(&#x27;column_A&#x27;) #returns column object. </code></pre>
+                    <ol type="1" start="6">
+                        <li><strong>Using <code>selectExpr()</code>:</strong></li>
+                    </ol>
+                    <p>The <code>selectExpr()</code> function allows you to reference a column using SQL-like
+                        expressions. This method can be convenient when you need to perform transformations using SQL
+                        functions or aliases.</p>
+                    <pre
+                        class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">df.selectExpr(&quot;Age&quot;, &quot;City as City_Alias&quot;)</code></pre>
+                    <p><br />These are some of the ways to reference a column in PySpark. Depending on your use case and
+                        requirements, you can choose the method that best fits your needs. I personally use
+                        <br /><code>col()</code> or the Bracket notation the most, since they allow for special
+                        characters, which reduces the error rate in dynamic applications. For simplicity of notation the
+                        Dot notation is used sometimes below. </p>
+                </div>
+            </figure>
+
+            <h3 id="column-object">Accessing column values:</h3>
+            <p>If you were to print column_A you would get a column object. This looks like so:</p>
+            <pre class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">print(column_A)
+ OUT: Column&lt;b&#x27;column_A&#x27;&gt; #b refers to the datatype byte</code></pre>
+            <p>Essentially, we can understand a column object as a wrapper of a bunch of row objects.</p>
+            <p>For the sake of argument, let’s print out the first row of column_A to see what it looks like:</p>
+            <pre class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">print(column_A.first())
+ OUT: Row(column_A=1)</code></pre>
+            <p>Unlike in pandas, we cannot directly access the value of the column because of the Row wrapper. We can do
+                this in a few different ways. The least computing power is needed when accessing it like so (#1):</p>
+            <pre class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">#1. Indexing inside the row object:
+ val_row_col_A = column_A.row[0] # This happens: Row(column_A=1)[0]
+            
+#2. Accessing via . notation:
+ val_row_col_A = df.row.column_A # Redundant, generally not used
+            
+#3. RDD mapping to mimic a Pandas-like structure:
+ values = df.rdd.map(lambda row: row.desiredcolumn).collect()</code></pre>
+            <p>As you see, we have to access the row before we navigate to the column in PySpark. Therefore, accessing
+                all values of a column can be a bit tricky. We will essentially have to use a for loop using an index to
+                iterate through option 1 or use <code>rdd.map</code> - a very computing expensive operation - to do so.
+            </p>
+
+            <h3>Example: Iterating Without Indices</h3>
+            <p>Column Objects introduced <a href="#non-iterable-column">above</a> are not iterable: No iteration without
+                an index. This breaks standard for-loops. Technically the underlying programming principle replaces all
+                iterative aspect with parallelisable native methods - so there's simply no need for static for loops
+                anymore.
+                Should you nonetheless want to iterate over a column the workaround for replacing
+                <code>iterrows()</code> with <code>collect()</code> first collecting the elements and then iterating
+                over the collected list as a counter.</p>
+            <p>To make this as conscise as possible, we'll assume a dataframe called <code>df_orders</code> and
+                <code>df_discounts</code>. Here we're aiming to check whether a discount code was active at the time of
+                purchase by checking its active timeframe in <code>df_discounts</code> and whether the purchase data in
+                <code>df_orders</code> falls into that timeframe.</p>
+            <p><strong>Pandas Approach:</strong></p>
+            <pre class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">
+filtered_orders = []
+for i, order in df_orders.iterrows():
+    discount_code = order['discount_code']
+    timestamp = order['timestamp']
+    discount = df_discounts[df_discounts['discount_code'] == discount_code]
+    start = discount['start'].values[0]
+    end = discount['end'].values[0]
+    if start <= timestamp <= end:
+        filtered_orders.append(order)
+
+valid_orders_df = pd.DataFrame(filtered_orders)
+print(valid_orders_df)</code></pre>
+
+            <p><strong>PySpark Approach:</strong></p>
+            <pre class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">
+for order in df_orders.collect():
+    discount_code = order['discount_code']
+    timestamp = order['timestamp']
+    discount = df_discounts.where(df_discounts['discount_code'] == discount_code).collect()[0]
+    start = discount['start']
+    end = discount['end']
+    if start <= timestamp <= end:
+        filtered_orders.append(order)
+</code></pre>
+            <blockquote class="block-color-gray"><strong>Disclaimer: </strong><br />while this entirly suffices to get
+                the job done. The real PySparkian way would be a SQL style subquery or window function for further
+                filters. Filtering suffices as a standard example where you would use iterrows in pandas but have much
+                more sophisticated options in PySpark. Go to <a href="pyspark_fitering_1">an introduction to PySpark
+                    filtering</a> or <a href="pyspark_filtering_2">complex filtering</a> for more details.<br />
+            </blockquote>
+            <figure class="callout block-color-orange_background" style="display:flex">
+                <div style="width:100%">To access the values of a column is a bit tricky in Pyspark. We can either use:
+                    <p>… a for loop iterating through every row from 0 to <code>df.count()</code> combined with
+                        <code>val_row_col_A = column_A.row[0]</code> or </p>
+                    <p>… a very computing expensive operation to map the column to rdd and collect values from there
+                        with <code>df.rdd.map(lambda row: row.desiredcolumn).collect()</code></p>
+                    <p><strong>💡Collect Method:</strong> Used to retrieve data from a Spark DataFrame into a Python
+                        list.</p>
+                    <p><strong>💡RDD Map Function:</strong> Demonstrated to show how to access column values
+                        efficiently.</p>
+            </figure>
+
+            <h3 id="aggregation-functions">Collect + Aggregation functions in PySpark</h3>
+            <p>Aggregate functions are great for EDA because they contain all the basic ideas like min, max, mean and
+                median but also skewness, kurtosis and variations of standard deviations.</p>
+            <p>Above all the code is very intuitive and readable.</p>
+            <pre
+                class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">df.select(mean("columnname"))</code></pre>
+            <figure class="callout block-color-gray_background" style="white-space:pre-wrap;display:flex">
+                <div class="icon" style="font-size:1.5em">💡</div>
+                <div style="width:100%">Note that this returns a <code>spark.df column</code>.</div>
+            </figure>
+            <p>But again they return a PySpark column object.</p>
+            <p>The issue hereby is if we want to use that value for further operations we run into the standard PySpark
+                problem: we need to use labour intensive functions to return the value of the column instead of the
+                reduced dataframe construct.</p>
+            <p>As seen previously <code>collect()</code> is somehow the <code>.values()</code> equivalent for PySpark.
+                However, just adding collect() does not do the job. It returns a list of row objects rather than a
+                dataframe, but still not what we want. We still need to specify, what within that list we are interested
+                in. I.e., the value construct at position [0][0].</p>
+            <pre
+                class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">df.select(mean("columnname")).collect()[0][0]</code></pre>
+            <p>Another way of writing aggregate functions is as follows. It has the same functionality.</p>
+            <pre
+                class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">df.agg({"columnname": "mean"}).collect()[0][0]</code></pre>
+            <hr class="custom-separator">
+
+
+
+
+            <h3>Doing stuff to columns:</h3>
+            <p>However, Column Objects have their benefits. They allow us to do operations on all values contained in
+                the column or rename the column with one operator: <code>withColumn</code>.</p>
+            <p>To do a transformation of all values in a column we specify the name of the column where the values lie
+                and where they will be stored afterwords. Basically you can transform them inplace or generate a new
+                column within the same method. </p>
+            <pre class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">#General Idea: 
+df.withColumn(&quot;ColumnName&quot;, Data*transformation)
+
+#Example: 
+df.withColumn(&quot;column_A&quot;, df.column_A + 1) #change existing column 
+df.withColumn(&quot;column_B&quot;, df.column_A + 1) #save in separate column </code></pre>
+            <p>We can also use this to create a new column and populate it with values: </p>
+            <pre class="code"><code class="language-Python">
+df.withColumn(&quot;NewColumnName&quot;)
+df.withColumn(&quot;NewColumnName&quot;, NewData)</code></pre>
+            <p>How about renaming? </p>
+            <pre
+                class="code"><code class="language-Python">df.withColumnRenamed(&quot;existingName&quot;, &quot;newName&quot;)</code></pre>
+            <p>We can even use it to change the schema of an existing column together with a cast command. </p>
+            <pre class="code"><code class="language-Python">
+#if the column already exists
+df.withColumn(&quot;ExistingColumnName&quot;,df[&quot;ExistingColumnName&quot;]
+                              .cast(&#x27;StringType&#x27;))
+
+#if the column does not yet exist
+#populate new column with None and cast it to a Type
+df.withColumn(&quot;NewColumnName&quot;, lit(None).cast(StringType()))</code></pre>
+
+
+<figure class="callout block-color-orange_background" style="white-space:pre-wrap;display:flex;flex-direction:column;overflow:hidden">
+    <div style="width:100%;overflow-wrap:break-word;word-break:break-word">
+ You can use the <code>withColumn</code> operator <p><span style="border-bottom:0.05em solid">with existing columns …</span><br />… to change their name: <code>df.withColumnRenamed(&quot;existingName&quot;, &quot;newName&quot;)</code><br />… transform their values:<br /><code>df.withColumn(&quot;ColumnName&quot;, Data*transformation)</code><br />… change their datatype:<br /><code>df.withColumn(&quot;ExistingColumnName&quot;,df[&quot;ExistingColumnName&quot;]<br />.cast(&#x27;StringType&#x27;))<br /></code></p> <p><span style="border-bottom:0.05em solid">with new columns …</span><br />… to save transformed values in a new column:<br /><code>df.withColumn(&quot;NewColumnName&quot;, Data*transformation)</code><br />… to make a new column:<br /><code>df.withColumn(&quot;NewColumnName&quot;)<br /></code>... and fill it with data: <code>df.withColumn(&quot;NewColumnName&quot;, NewData)</code><br />… fill it with data and specify the datatype:<br /><code>df.withColumn(&quot;NewColumnName&quot;, lit(None).cast(StringType()))<br /><br /></code></p> </div>
+</figure>
+<h3>Filling Columns of Dataframes with odd things</h3>
+<p>The <code>withColumn()</code> operator has more options in store.</p>
+<p>Some useful methods to fill Dataframe columns, aside from the classics are given her:</p>
+
+<h3>Filling Columns with Constant Values</h3>
+<p>Sometimes you want to initialise a dataframe column with a constant value, such that you can then do operations within that column on certain rows. Wrapping, whatever constant value you want inside the <code>lit()</code> command will do exactly that.</p>
+
+<pre class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">df.withColumn('constant', lit(0))</code></pre>
+
+<h3>Filling Df Columns by condition</h3>
+<p>If we want to do something in that dataframe based on the condition, whether a value is contained in another dataframe we can use a <code>when(..).otherwise(…)</code> construct.</p>
+<p>Say we want to create a column which gets filled with value A if the condition X holds and with value B otherwise. Say the condition is filtering whether a column contains a specific value like so:</p>
+<pre class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">df.filter(col("name").contains("mes"))</code></pre>
+<p>The cool thing is: we can integrate this directly into the <code>withColumn()</code> operator.</p>
+<p>This allows us to specify the condition, as well as the conditional action within the <code>withColumn</code> construct. However, (like the switch-case logic in e.g. Java) we need to also contain a default, that takes place, when the condition is not met. The default is specified within <code>otherwise(…)</code>.</p>
+<p>The <code>when(…).otherwise(…)</code> construct specifies what transformation should be done on the data in the action column when the condition is met. It therefore occupies the place, which in the basic <code>withColumn</code> construct is occupied by the data.</p>
+
+<pre class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">df.withColumn('actionColumn', when(df_other.filter(col("CheckingColumn").contains("value")),"do something").otherwise(df.actionColumn))</code></pre>
+
+<p>Apart from the <code>contains()</code> command, which serves to check for a value in another dataframe. We can also use the same construct to navigate to a certain row, where the checking column holds a certain value. Say we want to change an address in a database. We want to change that address for all people that belong to the family (Say they are called Smith) that moved. So we check in the column “surnames” (*checking column*) for all rows, where it takes on the value “Smith” and then change the corresponding address in the “address” column (*action column*).</p>
+
+<hr class="custom-separator">
+<figure id = "tldr" class="callout block-color-orange_background"
+style="background-color: #ffe6e6; border-left: 4px solid #ff4d4d;white-space:pre-wrap;display:flex;flex-direction:column;overflow:hidden">
+<div class="icon">📌</div>
+<div style="width:100%;overflow-wrap:break-word;word-break:break-word">
+    <strong>TL;DR: </strong>Pyspark uses relational databases at its core. You can think of this structure as rows with attributes (columns). Thus, column values can only be accessed via the row, which has been assigned a certain value for this attribute. 
+   
+🔍 To <strong>access a column</strong> use <code>df.select(&#x27;desired_column&#x27;)</code>. We also use this in filtering. 
+
+🔍 To <strong>access the values of a column</strong> we can either use:<p>… a for loop iterating through every row from 0 to <code>df.count()</code> combined with <code>val_row_col_A = column_A.row[0]</code> or </p><p>… a very computing expensive operation to map the column to rdd and collect values from there with <code>df.rdd.map(lambda row: row.desiredcolumn).collect()</code></p>
+
+🔍 To <strong>do stuff to columns</strong> you can use the <code>withColumn</code> operator 
+<span style="border-bottom:0.05em solid">with columns …</span><p>… to change their name: <code>df.withColumnRenamed(&quot;existingName&quot;, &quot;newName&quot;)</code></p><p>… transform their values: <br /><code>df.withColumn(&quot;ColumnName&quot;, Data*transformation)</code></p><p>… change their datatype: <br /><code>df.withColumn(&quot;ColumnName&quot;,df[&quot;ExistingColumnName&quot;].cast(&#x27;StringType&#x27;))</code></p><p>… to save transformed values in a new column: <br /><code>df.withColumn(&quot;NewColumnName&quot;, Data*transformation)</code></p><p>… to make a new column: <code>df.withColumn(&quot;NewColumnName&quot;)</code></p><p>… and fill it with data: <code>df.withColumn(&quot;NewColumnName&quot;, NewData)</code></p><p>… fill it with data and specify the datatype: <br /><code>df.withColumn(&quot;NewColumnName&quot;, lit(None).cast(StringType()))</code></p>
+
+🔍 To <strong>specify conditional logic</strong> in <code>withColumn</code>, use the <code>when(…).otherwise(…)</code> construct to define transformations based on conditions:
+<code>df.withColumn('actionColumn', when(df_other.filter(col("CheckingColumn").contains("value")),"do something").otherwise(df.actionColumn))</code>
+
+</div>
+</figure>
+
+ </section>
+    </article>
+</div>
+
+    <footer>
+        <p>&copy; 2024 Julia Hagen. All rights reserved.</p>
+    </footer>
+</body>
+
+</html>

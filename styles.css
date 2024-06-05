@@ -1,0 +1,566 @@
+/* Existing CSS */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #fff;
+    color: #000;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: rgb(0, 0, 0);
+    color: #fff;
+    padding: 1rem;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin: 0 1rem;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+section {
+    padding: 2rem;
+    text-align: center;
+}
+
+.button {
+    border: none;
+    border-radius: 25px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    margin: 0.5rem;
+    transition: background-color 0.3s ease;
+}
+
+.accent-button {
+    background-color: #ff5733; /* Example accent color */
+    color: #fff;
+}
+
+.accent-button:hover {
+    background-color: #ff6f50;
+}
+
+.filter-button {
+    background-color: #ddd;
+}
+
+.filter-button:hover {
+    background-color: #ccc;
+}
+
+.portfolio-items {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.card {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin: 1rem;
+    padding: 1rem;
+    width: 200px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.post-date {
+    font-size: 0.8rem;
+    color:#888;
+}
+.card .post-date:hover {
+    color:#888;
+}
+
+footer {
+    background-color: #000;
+    color: #fff;
+    padding: 1rem;
+    text-align: center;
+}
+
+
+/* Blog Post Specific CSS */
+.blog-post {
+    text-align: justify; /* Ensures text is in block format */
+    font-family: 'Georgia', serif; /* Change to a more readable font */
+    line-height: 1.8; /* Increase line height for better readability */
+    font-size: 1.1rem; /* Adjust font size */
+    color: #333; /* Darker text color for better contrast */
+}
+
+.blog-post .post-title, .blog-post .post-date, .blog-post .post-tags, .blog-post blockquote, .blog-post figure, .blog-post figcaption {
+    text-align: left;
+}
+
+.card h3:hover {
+    color:rgb(0, 0, 0);
+    font-style: normal; /* Remove italic on hover */
+    transition: box-shadow 0.3s ease, color 0.3s ease, font-style 0.3s ease, transform 0.3s ease;
+    transform: scale(1.05); 
+    
+}
+
+.portfolio-items a:hover{
+    color:rgb(0, 0, 0);
+    font-style: normal; /* Remove italic on hover */
+}
+
+.blog-post figure figcaption {
+    text-align: center; /* Optional: Keep captions centered if you prefer */
+}
+
+article.blog-post {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem; /* Increase padding for more white space */
+    border-radius: 10px;
+    background-color: #ffffff; /* White background for a clean look */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: relative; /* Ensure the pseudo-element for the line is positioned correctly */
+}
+
+.post-cover-image {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+.post-title {
+    font-family: 'Helvetica', 'Arial', sans-serif; /* Modern, non-serif font for title */
+    font-size: 2.5rem; /* Larger font size for title */
+    margin: 1.5rem 0;
+    font-weight: bold; /* Bold title for emphasis */
+}
+
+.blog-posts-container .post-date {
+    font-family: 'Helvetica', 'Arial', sans-serif; /* Modern, non-serif font for date */
+    color: #888;
+    margin-bottom: 1rem; /* Add some space below the date */
+}
+
+.blog-post .code {
+    font-size: 0.9rem;
+}
+
+.post-tags {
+    font-family: 'Helvetica', 'Arial', sans-serif; /* Modern, non-serif font for tags */
+    margin: 1rem 0;
+}
+
+.tldr a{
+    font-family: 'Helvetica', 'Arial', sans-serif; /* Modern, non-serif font for tags */
+    font-size: 1.0rem; /* Add 'rem' or 'px' for font size unit */
+    background-color: #ffe6e6;
+    color:  #e04343;
+    display: inline-block; /* Ensure it behaves like a block-level element */
+    padding: 0.2rem 0.5rem; /* Add some padding to make it look like a tag */
+    border-radius: 5px; /* Rounded corners */
+    text-decoration: none; /* Remove the default underline for links */
+}
+
+.tldr a:hover{
+    transform: scale(1.05);
+}
+
+.tag {
+    display: inline-block;
+    background-color: #eee;
+    border-radius: 5px;
+    padding: 0.2rem 0.5rem;
+    margin: 0.2rem;
+    font-size: 0.9rem;
+}
+
+.post-content {
+    margin-top: 2rem; /* Add more space at the top of content */
+    text-align: justify; /* Ensure content text is justified */
+}
+
+.post-content h1, .post-content h2, .post-content h3, .post-content h4, .post-content h5, .post-content h6, .post-content b, .post-content strong {
+    font-family: 'Helvetica', 'Arial', sans-serif; /* Modern, non-serif font for headers and bold text */
+    font-weight: bold; /* Ensure headers and bold text are bold */
+}
+
+.post-content h2 {
+    margin-top: 3rem; /* Adjust this value to control the space above h2 */
+}
+
+.post-content pre {
+    background-color: #2d2d2d;
+    color: #f8f8f2;
+    padding: 1rem;
+    border-radius: 5px;
+    overflow-x: auto;
+    font-size: 0.8rem; /* Ensure code font size is readable */
+}
+
+blockquote {
+    background-color: #f9f9f9;
+    border-left: 4px solid #ccc;
+    margin: 1.5rem 0; /* More space around blockquotes */
+    padding: 1rem 1.5rem;
+    border-radius: 5px;
+    font-style: italic; /* Italicize blockquote text */
+}
+
+figure {
+    margin: 1.5rem 0;
+}
+
+figure img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    display: inline-block;
+    margin: 0 auto; /* Center images */
+}
+
+figcaption {
+    font-size: 0.9rem;
+    color: #555;
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+/* Center images within blog post figures */
+.blog-post figure {
+    text-align: center;
+}
+
+.blog-post figure img {
+    display: inline-block;
+}
+
+/* Grey line at the bottom of the text */
+.blog-post::after {
+    content: "";
+    display: block;
+    width: 50%; /* Line width set to half the width of the blog post */
+    height: 2px;
+    background-color: rgba(0, 0, 0, 0.1); /* Match the shadow color */
+    margin: 2rem auto; /* Add space above the line and center it */
+    margin-bottom: 4rem;
+   
+}
+.column-list {
+    display: flex;
+    justify-content: space-around; /* Distribute space around the columns */
+    align-items: center; /* Align items in the center vertically */
+}
+
+.column {
+    display: inline-block;
+    vertical-align: top;
+}
+
+pre.code {
+    white-space: pre-wrap; /* Ensure long lines of code wrap to stay visible */
+    word-break: break-all; /* Ensure words break if necessary to fit */
+    overflow-x: auto; /* Enable horizontal scrolling for code blocks */
+    margin: 1rem;
+}
+
+/* Ensure that Prism.js styles are applied correctly */
+pre[class*="language-"] {
+    background: none; /* Remove any background color set by your custom styles */
+}
+
+
+/* Callout blocks styling */
+.callout {
+    display: flex;
+    background-color: #e8f0fe;
+    border-left: 4px solid #4285f4;
+    margin: 2rem; /* More space around callouts */
+    padding: 2rem; /* Padding for all sides */
+    border-radius: 5px;
+    text-align: justify; /* Justify text inside callouts */
+    font-family: 'Arial', sans-serif; /* Sans serif font for callout text */
+    padding-right: 2rem; /* Ensure right padding */
+}
+
+.block-color-tldr {
+    background-color: #ffe6e6;
+    border-left: 4px solid #ff4d4d;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.callout .icon {
+    font-size: 1.5em;
+    margin-right: 0.8rem;
+    align-self: center; /* Align icon in the center vertically */
+}
+
+/* Ensure text inside the callout is justified */
+.callout div {
+    text-align: justify;
+}
+
+.callout code {
+    font-size: 1rem;
+}
+
+
+.callout-content {
+    width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.callout-content ul {
+    margin: 0; /* Remove default margin */
+    padding-left: 1.5em; /* Add some padding for list */
+    
+}
+
+.callout-content ul li {
+    margin-bottom: 0.5em; /* Space between list items */
+}
+
+/* Custom HR element styling */
+hr.custom-separator {
+    border: none; /* Remove default border */
+    height: 1px; /* Set the height of the line */
+    background-color: #ccc; /* Color of the line */
+    width: 75%; /* Width of the line */
+    margin: 2rem auto; /* Center the line and add vertical space */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+header {
+    background-color: #000;
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+}
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+}
+.about-section {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    margin: 2rem 0;
+    padding: 2rem;
+}
+
+.about-section img {
+    border-radius: 50%;
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    margin-right: 2rem;
+}
+
+.profile-image {
+    border-radius: 50%;
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    margin-right: 2rem;
+}
+
+.about-text {
+    font-family: 'Serif', serif;
+    font-size: 1.2rem;
+    text-align: justify;
+    max-width: 600px;
+    flex-grow: 1;
+}
+
+.about-text h2 {
+    font-family: 'Sans-Serif', sans-serif;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.about-sidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: left;
+    margin-left: 2rem;
+    font-family: 'Sans-Serif', sans-serif;
+    max-width: 250px;
+}
+
+.about-sidebar .button {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background-color: #ff4d4d;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-bottom: 1rem;
+}
+
+.about-sidebar .button:hover {
+    background-color: #e04343;
+}
+
+.about-sidebar .button-inverted {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #ff4d4d;
+    background-color: transparent;
+    border: 2px solid #ff4d4d;
+    border-radius: 5px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+    margin-bottom: 1rem;
+}
+
+.about-sidebar .button-inverted:hover {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+.about-sidebar .separator {
+    height: 1px;
+    background-color: #ccc;
+    margin: 1rem 0;
+}
+
+.about-sidebar p {
+    font-size: 1rem;
+    margin: 0.5rem 0;
+}
+
+.spotify-container {
+    transform: scale(0.85);
+    transform-origin: top left;
+    width: 100%;
+}
+
+.contact-section {
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.contact-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.icon-button {
+    display: inline-block;
+    padding: 15px 15px;
+    font-size: 24px;
+    color: white;
+    background-color: #ff4d4d;
+    border: none;
+    border-radius: 50%;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.icon-button:hover {
+    color:  white;
+    background-color: #e04343;
+    transition: box-shadow 0.3s ease, color 0.3s ease, font-style 0.3s ease, transform 0.3s ease;
+    transform: scale(1.05); 
+}
+
+.icon-button i {
+    display: block;
+}
+
+.button:hover .icon {
+    animation: grow-shake 0.8s ease forwards;
+}
+
+.button:hover {
+    transform: scale(1.1);
+}
+
+.button:hover .icon {
+    animation: grow-shake 0.9s ease forwards;
+}
+
+@keyframes grow-shake {
+    0%, 100% {
+        transform: scale(1) rotate(0deg);
+    }
+    50% {
+        transform: scale(1.2) rotate(10deg);
+    }
+    75% {
+        transform: scale(1.2) rotate(-10deg);
+    }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .about-section {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .about-content, .side-content {
+        max-width: 100%;
+        padding: 1rem 0;
+    }
+
+    .image-container img {
+        max-width: 150px;
+    }
+}
+
+a {
+    color: black; /* Accent color */
+    text-decoration: none; /* No underline */
+}
+
+a:hover {
+    color: #e04343; /* Darker accent color on hover */
+    font-style: normal; /* Remove italic on hover */
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background-color: #e0e0e0; /* Replace with the exact color of the small separator */
+    margin: 2rem 0;
+}
+
+.small-separator {
+    background-color: #e0e0e0; /* Replace with the exact color of the small separator */
+    height: 1px;
+    width: 100%;
+    margin: 1rem 0;
+}

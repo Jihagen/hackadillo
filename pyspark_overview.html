@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Why does everyone 😡✨ PySpark and ❤️🐼 Pandas?</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="prism.css">
+    <script src="prism.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Julia Hagen</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div id="blog-posts-container">
+    <article class="blog-post">
+        <h2 class="post-title">Why does everyone 😡✨ PySpark and ❤️🐼 Pandas?</h2>
+        <p class="post-date">May 30, 2024 1:55 PM</p>
+        <div class="post-tags"><span class="tag">🐼 Pandas</span><span class="tag">✨ PySpark</span></div>
+
+        <section class="post-content">
+            <div class="tldr">
+                <a href="#dfs-1">📌 TL;DR </a>
+            </div>         
+            <p>There’s a running theme to people in entry-level positions that first dip their toes in enterprise Python development: companies love PySpark and the newbies hate it. But why?</p>
+            <p>When you’re new to python you learn to love pandas. It’s <em>the</em> library. Loading and manipulating data, visualisations and more come easy and intuitive with pandas and other libraries built on it. While pandas are here to stay, it’s simply not suitable for enterprise-grade development. Pandas is rigid and works perfectly for experiments on small datasets but not for the tera- to petabytes of data enterprise-grade DevOps have to process daily. That’s where PySpark comes in. And its working principle is inherently different from pandas.</p>
+            
+            <h2>The Double-Edged Sword of Parallelisation</h2>
+            <p>Dealing with huge amounts of data means either accepting insane runtimes or restructuring the work such that it can be run in parallel. Essentially PySpark does the latter. This is why it is so favoured by large companies.</p>
+            <p>But parallelisation comes at a cost. If you want to run the same operation in parallel you have to chunk the data into smaller pieces which multiple workers (CPUs) can operate on in parallel and then stick them together again. Doing this is much easier if you are free to arrange the data in whatever order you want when sticking them together again. Aka when you do not have to adhere to a previously assigned index which you have to keep track of while running operations distributedly. If you did it would easily become messy. The main difference between PySpark and Pandas is just this: PySpark doesn’t do indexing. Pandas does. And that’s what’s so intuitive about it.</p>
+            <p>Pandas essentially transforms every table into a matrix, where you can easily access entries via specifying row or column numbers. PySpark instead interprets tables as relational databases. If this rings a bell, it’s because PySpark is essentially python running on SQL. Any filtering queries are translated into SQL under the hood. This also explains why PySpark is much less flexible when it comes to datatypes. One column one datatype. Just like SQL. We’re not surprised.</p>
+            <p>While this is basically all there is to the struggle, the above has some practical consequences that are a pain if you’re used to pandas. Some core operational ideas that work with indices - like pandas column or row access operations, simple for loops and even aspects of data filtering - simply don’t work anymore. In addition the syntax is <em>almost</em> identical - making the entire operation even more frustrating since the slight differences simply don’t stick.</p>
+            <p>But there’s light at the end of the tunnel. Once you got the difference in processing down, there are only minor syntactical pitfalls to get used to. And then your code will run in a fraction of the time needed for lazy pandas.</p>
+            <p><strong>This is by no means a full guide to PySpark</strong>. But it summarises all that lay at the basis of the troubles I had in the first year of getting started with PySpark.</p>
+
+            <ol>
+                <li id="dfs-1"><strong>Dataframes in Pandas are not the same as Dataframes in PySpark.</strong>
+                    <p>The core structure - matrices (or nested arrays) in Pandas and SQL relational datatables in PySpark - is not the same. This has consequences. Setting up Dataframes is somewhat more sophisticated in PySpark. See <a href="pyspark_dataframes.html" >here</a>> for details.</p>
+                </li>
+                <li id="no-indices"><strong>PySpark won’t allow indices.</strong>
+                    <p>This is the main painpoint. Extracting data from a dataframe once so intuitive in Pandas now requires a shift in approach that doesn’t rely on indices. Accessing Columns and Rows in SQL-think. See <a href="pyspark_columns.html">here</a> for details.</p>
+                </li>
+                <li id="pyspark-SQL-python"><strong>PySpark is SQL in Python.</strong>
+                    <p>If you’re vaguely familiar with SQL PySpark is absolutely awesome. You can do sophisticated filtering and joining in SQL style, while having the smooth pythonic display and saving of intermediate results (say goodbye to view-temporary-table) and extensive calculation capabilities. Click <a href="pyspark_filtering_1.html">here</a> for an introduction or see <a href="pyspark_taming_the_beast.html">this</a> for advanced filtering, where PySpark really shines.</p>
+                </li>
+                <!-- <li id="troubleshooting-1"><strong>Troubleshooting essentials.</strong>
+                    <p>Short interlude to talk about datatypes. Easily the most common newbie waste-of-time. Especially, if you find yourself in the situation, where column headers hold whitespaces. Disclaimer: this breaks everything - especially in pypsark. This introduces a simple Dataload code snippet, which makes sure you never need to think about such things again.</p>
+                </li> -->
+            </ol>
+        </section>
+    </article>
+    </div>
+    <footer>
+        <p>&copy; 2024 Julia Hagen. All rights reserved.</p>
+    </footer>
+</body>
+</html>

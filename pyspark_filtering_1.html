@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PySpark vs. Pandas: An Introduction to Filtering</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="prism.css">
+    <script src="prism.js"></script>
+</head>
+
+<body>
+    <header>
+        <h1>Julia Hagen</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div id="blog-posts-container">
+    <article class="blog-post">
+        <h1 class="post-title">PySpark vs. Pandas: An Introduction to Filtering</h1>
+        <p class="post-date"> December 27, 2022 2:44 PM</p>
+        <div class="post-tags"><span class="tag">🐼 Pandas</span><span class="tag">✨ PySpark</span><span class="tag">🗃️
+                Filtering</span></div>
+
+        <section class="post-content">
+            <div class="tldr">
+                <a href="#tldr">📌 TL;DR </a>
+            </div>         
+            <p>With SQL relational Databases as core structure Pyspark heavily relies on SQL Syntax and Methods to do its filtering. For example the <code>select</code> and <code>where</code> operators are used in the same way as in SQL. But you can also directly implement SQL inside of Pyspark.</p>
+
+            <blockquote class="block-color-gray"><strong>Editor’s note:</strong> Here we look at the methods available in PySpark to filter your data, why and how they differ from pandas and instead syntactically resemble SQL. The examples are very basic and static i.e., we hard code a value that we want to filter for (Age > 27). <br /><br />
+                    But maybe you have <strong>more than one specific age, multiple variables or even more dynamic filtering in mind? Head here for the real deal: Dynamic filtering with window functions, aggregate functions and subqueries. This is where Pyspark becomes really powerful.</strong>
+            </blockquote>
+<hr class="custom-separator">            
+            <h3>Filtering with Pandas</h3>
+
+<p>Filtering in pandas is intuitive and straightforward. You can directly filter a DataFrame based on conditions using the <code>[]</code> notation.</p>
+
+<p>For example, to filter rows where the <code>Age</code> column is greater than 27:</p>
+
+<pre class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">df[df['Age'] > 27]</code></pre>
+
+<p>This returns a DataFrame containing only the rows where the condition is met. Alternatively, you can use the <code>filter</code> method:</p>
+
+<pre class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">df.filter(items=['Age'], like='27')</code></pre>
+
+<p>For example, to filter rows and select specific columns:</p>
+
+<pre class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">df[df['Age'] > 27][['Name', 'Age']]</code></pre>
+
+<p>In this case, <code>df['Age'] > 27</code> filters the DataFrame rows based on the condition, and <code>[['Name', 'Age']]</code> selects the <code>Name</code> and <code>Age</code> columns from the filtered DataFrame.</p>
+
+<p>Pandas allows you to use double brackets <code>[[ ]]</code> to access and filter columns. This notation works because a pandas DataFrame can be thought of as a nested list (or dictionary) where each column is a key. Just as you would access elements in a dictionary using keys, you can access DataFrame columns using their names. Technically the dataframe wrapper is more of a visual cue on how your data will be displayed. This differs from the function heavy dataframe API approach in Pyspark.</p>
+
+<h3>PySpark Filtering</h3>
+
+<p>In PySpark, filtering data is done using the <code>filter</code> or <code>where</code> methods. These methods return a DataFrame with rows that satisfy the specified condition.</p>
+
+<p>For example, to filter rows where the <code>Age</code> column is greater than 27:</p>
+
+<pre class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">from pyspark.sql.functions import col
+
+# Using filter
+filtered_df = df.filter(col('Age') > 27)
+
+# Alternatively, using where
+filtered_df = df.where(col('Age') > 27)
+
+filtered_df.show()</code></pre>
+
+<h3>select & where</h3>
+
+<p>Let's look at <code>select</code> and <code>where</code> in PySpark:</p>
+
+<ul>
+    <li><strong><code>select</code></strong>: Specifies the columns to include in the final DataFrame.</li>
+    <li><strong><code>where</code></strong>: Specifies the condition to filter the rows.</li>
+</ul>
+
+<p>For example:</p>
+
+<pre class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all"># Create DataFrame with sample data
+data = [("Alice", 25, "Seattle"), ("Bob", 30, "New York"), ("Cathy", 28, "Seattle")]
+columns = ["Name", "Age", "City"]
+df = spark.createDataFrame(data, columns)
+
+# Filter data using select and where
+result = df.select("Name", "Age").where("Age > 27")
+result.show()</code></pre>
+
+<p>This code filters the DataFrame to include only rows where <code>Age</code> is greater than 27 and selects the <code>Name</code> and <code>Age</code> columns.</p>
+
+<h3>SQL Equivalent</h3>
+
+<p>Under the hood, PySpark translates these DataFrame operations into SQL queries:</p>
+
+<pre class="code"><code class="language-sql" style="white-space:pre-wrap;word-break:break-all">SELECT Name, Age
+FROM df
+WHERE Age > 27;</code></pre>
+
+<p>You can use SQL directly in PySpark by creating a temporary view and using the <code>spark.sql</code> method:</p>
+
+<pre class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">df.createOrReplaceTempView("df_view")
+
+# Run SQL query
+sql_query = """
+SELECT Name, Age
+FROM df_view
+WHERE Age > 27
+"""
+
+result = spark.sql(sql_query)
+result.show()</code></pre>
+
+<h3>Keeping All Columns</h3>
+
+<p>If you want to keep all columns after filtering, you can omit the <code>select</code> method and use only <code>where</code>:</p>
+
+<pre class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all">df.where("Age > 27")</code></pre>
+
+<h3>Using filter</h3>
+
+<p>The <code>filter</code> method can be used similarly to <code>where</code>:</p>
+
+<pre class="code"><code class="language-Python" style="white-space:pre-wrap;word-break:break-all"># Using filter before select
+df.filter("Age > 27").select("Name", "Age")
+
+# Using column reference
+df.filter(col("Age") > 27).select("Name", "Age")</code></pre>
+
+<p>In summary, both <code>filter</code> and <code>where</code> return a DataFrame with the filtered rows, while <code>select</code> specifies the columns to include in the result.</p>
+
+
+<figure class="callout block-color-tldr">
+    <div id="tldr" class="icon">📌</div>
+    <div class="callout-content">
+        <strong>TL;DR:</strong>
+        <p>Under the hood, PySpark translates DataFrame operations into SQL queries.</p>
+        <p>This means filtering with <code>select</code> and <code>where</code> is the same as in SQL. <code>select</code> specifies the columns of interest and <code>where</code> the filtering condition: <code>df.select("Name", "Age").where("Age > 27")</code>.</p>
+        <p>If we want to filter our dataframe but keep all columns we can also use <code>where</code> without <code>select</code>: <code>df.where("Age > 27")</code>.</p>
+        <p>We can use <code>filter</code> + <code>select</code> in the same way as <code>select</code> + <code>where</code> just in the opposite order. Inside the <code>filter</code> command we have the option to enter the condition as a String (like in <code>where("condition")</code>) or use a column reference followed by the condition.</p>
+        <p>a) <code>df.filter("Age > 27").select("Name", "Age")</code><br>
+        b) <code>df.filter(col("Age") > 27).select("Name", "Age")</code></p>
+    </div>
+</figure>
+
+
+</div>
+</article>
+</div>
+<span class="sans" style="font-size:14px;padding-top:2em"></span>
+
+<footer>
+    <p>&copy; 2024 Julia Hagen. All rights reserved.</p>
+</footer>
+</body>
+</html>

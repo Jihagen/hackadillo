@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Website</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1>Julia Hagen</h1>
+        <nav>
+            <ul>
+                <li><a href="#portfolio">Blog</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="about-section">
+        <img src="speaker.jpeg" alt="Julia Hagen" class="profile-img">
+        <div class="about-text">
+            <h2>About Me</h2>
+            <p>I'm a Data Science Research Assistant and Student. <!--  My academic journey has taken me from a Bachelor's in Politics and Economics in Münster, over a stint in Neuroscience and Computer Science at Maastricht University, to the intersection of Data Science and Artificial Intelligence in Biomedical Engineering. -->I have an affection for abstractions, theory and synaesthetic pattern-matching across seemingly unrelated disciplines.</p>
+            <p>Currently, I'm honing my skills at Siemens Healthineers building for ML and NLP use-cases. </p><p></p><!-- I've also dipped my toes in research and data analytics at ICM Investment Bank and had a stint as a diplomatic assistant at PARLACEN.--> I have lots of fun prototyping at Hackathons and for private projects. My favorite procrastination is getting into knowledge systems like building a second brain or refining my <a href="https://open.spotify.com/user/j.i.hagen?si=69047b93fd814634">Spotify playlists</a>. I practically live with my VR headset on while working.</p>
+            <p>In my downtime, you can find me traveling, indulging in food, or engaging in a variety of sports like hiking, climbing, and tennis. I also love a good cup of coffee, a game of chess, and spending time with my lovely partner and dog.</p>
+        </div><div class="about-sidebar">
+            <a class="button-inverted" href="cv.pdf">Download my CV</a>
+            <a class="button accent-button" href="https://link.chess.com/play/xCVOSi"><strong>Challenge me on Chess.com!</strong> <i class="fas fa-chess-king icon"></i></a>
+            <div class="separator"></div>
+            <p><strong>Currently on my mind:</strong> <span>Prototyping stuff with AI Multi-Agent Systems</span></p>
+            <p><strong>Currently reading:</strong> <span><a href="https://www.goodreads.com/book/show/62686859-notes-on-complexity">Neil Theise: Notes on Complexity</a> & <a href="https://www.goodreads.com/book/show/13497991-the-hydrogen-sonata">Ian Banks: The Hydrogen Sonata</a></span></p>
+            <p><strong>Current favorite song:</strong> <div class="spotify-container">
+                <span>
+                    <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/5rIFFt6LclUTS5xIRnA7cR?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                </span>
+            </div>
+            </p>
+        </div>
+    </section>
+<hr class="custom separator">
+    <section id="portfolio">
+        <h2>Blog</h2>
+        <div class="filters">
+            <button class="button filter-button" data-filter="all">All</button>
+            <button class="button filter-button" data-filter="blogpost">Blogposts</button>
+            <button class="button filter-button" data-filter="github">GitHub Repos</button>
+            <!-- Add more filters if needed -->
+        </div>
+        <div class="portfolio-items" id="portfolio-items">
+            <a href="pyspark_overview.html"><div class="card" data-category="blogpost">
+                <h3>PySpark: An Introduction for Newbies</h3>
+                <div class="post-tags"><span class="tag">🐼 Pandas</span><span class="tag">✨ PySpark</span></div>
+                <p class="post-date">May 30, 2024</p>
+            </div></a>
+            <a href="pyspark_dataframes.html"><div class="card" data-category="blogpost">
+                <h3>PySpark vs. Pandas Dataframes: Same, same, but different.</h3>
+                <div class="post-tags"><span class="tag">🐼 Pandas</span><span class="tag">✨ PySpark</span></div>
+                <p class="post-date">November 16, 2022</p>
+            </div></a>
+            <a><div class="card" data-category="github">
+                <h3>GitHub Project</h3>
+                <div class="post-tags"><span class="tag">👾 Project Code</span></div>
+                <p class="post-date">May 15, 2024</p>
+                <p style="font-size:0.9rem;">View Repository</p>
+            </div></a>
+            <a href="pyspark_columns.html"><div class="portfolio-items">
+                <div class="card" data-category="blogpost">
+                    <h3>PySpark vs. Pandas: Columns, Rows & Working With Them</h3>
+                    <div class="post-tags"><span class="tag">🐼 Pandas</span><span class="tag">✨ PySpark</span></div>
+                    <p class="post-date"> April 22, 2023</p>
+                </div></a>
+            <a href="pyspark_filtering_1.html"><div class="card" data-category="blogpost">
+                <h3>PySpark vs. Pandas: An Introduction to Filtering</h3>
+                <div class="post-tags"><span class="tag">🐼 Pandas</span><span class="tag">✨ PySpark</span></div>
+                <p class="post-date"> December 27, 2022</p>
+            </div></a>
+            <a href="pyspark_taming_the_beast.html"><div class="card" data-category="blogpost">
+                <h3>Taming the Beast: Unleashing the Power of PySpark SQL for Data Filtering</h3>
+                <div class="post-tags"><span class="tag">🐼 Pandas</span><span class="tag">✨ PySpark</span></div>
+                <p class="post-date"> May 28, 2024</p>
+            </div></a>
+            <!-- Add more cards as needed -->
+        </div>
+    </section>
+
+    <section id="contact">
+        <div class="contact-section">
+            <h2>Contact</h2>
+            <div class="contact-buttons">
+                <a href="mailto:j.i.hagen@t-online.de" class="icon-button">
+                    <i class="fas fa-envelope"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/julia-isabel-hagen-9608171b8/" class="icon-button">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Julia Hagen. All rights reserved.</p>
+    </footer>
+    <script src="scripts.js"></script>
+    <script src="sort_posts.js"></script>
+</body>
+</html>

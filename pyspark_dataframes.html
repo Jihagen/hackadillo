@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataFrames in PySpark vs. Pandas: Same, same but different.</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="prism.css">
+    <script src="prism.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Julia Hagen</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div id="blog-posts-container">
+    <article class="blog-post">
+        <h1 class="post-title">DataFrames in PySpark vs. Pandas: Same, same but different.</h1>
+        <p class="post-date">November 16, 2022 11:36 AM</p>
+        <div class="post-tags"><span class="tag">🐼 Pandas</span><span class="tag">✨ PySpark</span></div>
+        <div class="post-content">
+            <div class="tldr">
+                <a href="#tldr">📌 TL;DR </a>
+            </div>         
+            <p>Coming from pandas to Pyspark is an exercise in error tolerance and mind bending. The syntax is <em>almost</em> identical - making the entire operation even more frustrating since the slight differences simply don’t stick. At least in my case.</p>
+            <p>In addition pandas users are used to a very well kept official documentation and multitude of online references. This is a different story for Pyspark. Spark has multiple language support, therefore finding the exact operation in Pyspark is difficult. Especially since the official documentation is kept to the bare minimum.</p>
+            <p>Try googling how to do x in pandas - just for Pyspark. Chances are that the first few results on GitHub will have at least one reply of doing the exact pandas operation. This has some validity since spark has pandas support. Except for when you really have huge amounts of data and pandas centres the entire operation to one node. Then you are set up to fail.</p>
+            <p>Therefore, motivated by my own frustration, this should serve as a little cheatsheet on translating basic operations from pandas dataframes to Pyspark. Even if pandas does not fail, Pyspark will simply be much quicker in execution time.</p>
+            <h2>Let’s recap the basics: How to create a dataframe in pandas vs. Pyspark?</h2>
+            <p>You can also skip to the <a href="#pyspark-createDataFrame">Pyspark</a> version directly. Follow along for a detailed view.</p>
+            <h3 id="pandas-createDataFrame">Pandas.DataFrame</h3>
+            <div class="column-list">
+                <div class="column" style="width:68.75%">
+                    <pre class="code"><code class="language-Python">import pandas as pd
+
+data = {'names': ['anna', 'max'], 'grades': [3, 4]}
+df = pd.DataFrame(data, columns)</code></pre>
+                </div>
+                <div class="column" style="width:31.25%">
+                    <figure class="image">
+                        <img style="width:192px" src=mini_df_pandas.png>
+                    </figure>
+                </div>
+            </div>
+            <p>We can simply assign a column to a variable and reference it intuitively by index.</p>
+            <div class="column-list">
+                <div class="column" style="width:50%">
+                    <pre class="code"><code class="language-Python">name = df['names']
+name[1]
+
+Out: 'max'</code></pre>
+                </div>
+                <div class="column" style="width:50%">
+                    <figure class="callout">
+                        <div class="icon">💡</div>
+                        <div style="text-align: left; margin-right: 5rem; flex: 1;">note that the column turned variable is of type <code style="font-size: 1rem;">pandas.core.series.Series</code></div>
+                    </figure>
+                </div>
+            </div>
+            <p>Now Pyspark has a different understanding of dataframes. This is mainly based on the lack of native indexing. Whereas in pandas all dataframes are referencable by index, since they are automatically assigned it in the backdrop, Pyspark does not work with indeces.</p>
+            <p>This makes referencing difficult, when coming from pandas, where many operations are rooted within the index. Nonetheless, once you get your head wrapped around that idea, spark is equally as intuitive, precisely because referencing is centred around the variables and types themselves.</p>
+            <h3 id="pyspark-createDataFrame">Pyspark.createDataFrame</h3>
+            <p>Assuming you have already set up your credentials the command for creating a dataframe in Pyspark is fairly straightforward.</p>
+            <pre class="code"><code class="language-Python">spark.createDataFrame(data, columns)</code></pre>
+            <p>Other than in pandas it seems Pyspark is somewhat more strict when it comes to datatypes compared to pandas. This is mainly due to pandas dataframes being an open data type. As such pandas dataframes are agnostic as to what type of data is being put into them. Therefore most assumptions about the dataframe are implicit i.e., inferred in the backdrop even when the user has not specified such. Other people [e.g. <a href="https://towardsdatascience.com/schema-specification-for-your-pandas-dataframes-c8b34d1eb37d">this blog</a>] have written more in depth about this.</p>
+            <p>The gist hereby is that we need to be more mindful of our datatypes in Pyspark than we used to be in pandas.</p>
+            <p>Therefore almost any simple explanation about creating dataframes in Pyspark must include a hint towards specifying the schema.</p>
+            <p>Say you want to create a dataframe from a list of ids for a product. These ids consist of different glyph types like <code>ABC_123</code>. Presuming you the list results from another operation, i.e., you have not initiated the list manually, which would in fact specify the datatype, problems may arise from the combination of different glyphs. Pyspark struggles to infer the correct datatype (<code>= schema</code>) for the new dataframe holding these ids. It needs to manually specified, whether you want to recognise the values as strings or else.</p>
+            <p>This can be done in varying depth.</p>
+            <pre class="code"><code class="language-Python">spark.createDataFrame(data, StringType()).toDF("columnname") </code></pre>
+            <p>.. suffices for specifying the data, datatype and column name for one column.</p>
+            <p>For more complex sets of data nested structures provide more customisability.</p>
+            <p>The correct terms here are <code>StructType</code> and <code>StructField</code>. The StructField applies to a single column and single data type. <code>StructType</code> is a set of <code>StructField</code>. I.e., it can specify the data type structure for the entire dataframe.</p>
+            <p>Given a set of data where each column should obtain a different data type the <code>schema</code> looks as follows:</p>
+            <pre class="code"><code class="language-Python">schema = StructType([
+    StructField("column1",StringType(),True),
+    StructField("column2",StringType(),True), 
+    StructField("column3",StringType(),True), 
+    StructField("column4", StringType(), True)
+  ])</code></pre>
+            <p>The <code>StructType</code> thereby is a list of <code>StructFields</code>. It can also be used within a <code>StructField</code> to specify data types for nested categories. This is useful if you want to contain say the first- and last name and (for the sake of another datatype) customer id within one column.</p>
+            <pre class="code"><code class="language-Python">schema2 = StructType([
+        StructField('name', StructType([
+             StructField('firstname', StringType(), True),
+             StructField('lastname', StringType(), True),
+             StructField('customer_id', IntegerType(), True)
+             ])),
+         StructField('nextcolumn', StringType(), True),
+         StructField('anothercolumn', FloatType(), True),
+         ])</code></pre>
+            <p>The schema can either be specified like this, broken out of line, or in-line.</p>
+            <pre class="code"><code class="language-Python">df2 = spark.createDataFrame(data,schema=schema2)
+
+df2 = spark.createDataFrame(data,schema=StructType([
+    StructField("column1",StringType(),True),
+    StructField("column2",StringType(),True), 
+    StructField("column3",StringType(),True), 
+    StructField("column4", StringType(), True)
+  ])</code></pre>
+            <h3>→ The consequences</h3>
+            <p>At first sight, the lack of an index in Pyspark should not impede on its functionality - and it does not. It just means that any operations in pandas that are based on an index, do not have the same functionality in pyspark.</p>
+            <p>This means anything to do with iterations, like looping over something, or by the same logic, accessing values inside a dataframe. The reason is fairly simple. Pyspark is optimised for parallel execution. Meaning if we want to do a transformation on a column of a dataframe pandas iterates through the dataframe row by row doing its thing. Pyspark in contrast takes <code>bins</code> of data and performs the transformation on those bins in parallel.</p>
+            <p><em>In other words:</em> Say there is a dataframe of 100 rows. Pandas iterates through the dataframe row by row, using its index to determine, which row comes next. Pyspark takes 4 <code>bins</code> of say 25 rows (you can specify bin size, which can be helpful but complex for higher magnitudes of data), does the transformation on them in parallel and sticks them back together. An index would only complicate things here and impair the parallelisation. One cannot stress this enough: for the same operation Pyspark needs only <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mn>1</mn><mn>4</mn></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{4}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.1901em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8451em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">4</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span><span>﻿</span></span> of the time - and this is its Unique Selling Point - but it cannot do so with an index.</p>
+            <p>In fact, it is physically impossible to manually assign an index in Pyspark because of that. If you want to do a workaround and assign a unique value to your rows you can use the following.</p>
+            <h3 id = "row-object">Index workaround Pyspark:</h3>
+            <pre class="code"><code class="language-Python">df.select("*").withColumn("row_id", monotonically_increasing_id())</code></pre>
+            <p><code>monotically_increasing_id()</code> will assign a unique integer to all rows. But there is no guarantee they are consecutive. Simply because even the assignment is parallelised.</p>
+            <p>Note how in pandas we can understand a dataframe as a list of list, easily accessible by index.</a></p>
+            <p>In Pyspark this is not the case. Therefore accessing values stored in a dataframe requires an <code>rdd</code> function. This transforms the contents of a column into an iterable object, i.e., a list of those values. Without using an <code>rdd</code> function we can do transformations on isolated values, select them or assign them to new places. However, they remain wrapped in a <code>pyspark.sql.dataframe</code> object. What this means becomes clear, when we try to do the same operations as we did <a href="#pandas-createDataFrame">here</a> in pandas. Instead of returning a single value, this will return a <code>Row object</code>:</p>
+            <pre class="code"><code class="language-Python">Out: [Row(col1='Max')]</code></pre>
+            <p>Intuitively accessing values inside a PySpark dataframe without indices is discussed <a href="pyspark_columns.html">here</a>.</p>
+            <figure class="callout">
+                <div class="icon">💡</div>
+                <div>The real take-away here is not to look for workarounds for using the same index-based logic as in pandas -<em>Top 1 on my list of what did not work</em>- because it slows everything down or causes Out Of Memory (OOM) failures.<br/><br/><strong>But replace list comprehensions with <code>groupBy()</code> and Aggregation Functions and get used to Dataframes as basis.</strong></div>
+            </figure>
+            <figure class="callout" style="background-color: #ffe6e6; border-left: 4px solid #ff4d4d;">
+                <div id = "tldr" class="icon">📌</div>
+                <div><strong>TL;DR:</strong> pandas has native indexing, which Pyspark does not, because of its parallelisable nature. This becomes important when we do iteration operations (like loops) or want to access values in a dataframe. Making the switch form pandas to Pyspark requires to <strong>replace list comprehensions with groupBy and Aggregation Functions and ditching the index based methods for navigating inside a dataframe. 
+                </strong> How? Have a look here  <a href="pyspark_columns.html">here</a>.</div>
+            </figure>
+        </div>
+    </article>
+    </div>
+    <span class="sans" style="font-size:14px;padding-top:2em"></span>
+
+    <footer>
+        <p>&copy; 2024 Julia Hagen. All rights reserved.</p>
+    </footer>
+</body>
+</html>
+</body>
+</html>
