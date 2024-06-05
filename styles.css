@@ -294,6 +294,8 @@ pre[class*="language-"] {
     text-align: justify; /* Justify text inside callouts */
     font-family: 'Arial', sans-serif; /* Sans serif font for callout text */
     padding-right: 2rem; /* Ensure right padding */
+    width: 100%; /* Ensure the callout takes the full width */
+    box-sizing: border-box; 
 }
 
 .block-color-tldr {
@@ -460,7 +462,6 @@ header {
 }
 
 .spotify-container {
-    transform: scale(0.85);
     transform-origin: top left;
     width: 100%;
 }
@@ -523,7 +524,6 @@ header {
         transform: scale(1.2) rotate(-10deg);
     }
 }
-
 /* Responsive styles */
 @media (max-width: 768px) {
     .about-section {
@@ -539,8 +539,24 @@ header {
     .image-container img {
         max-width: 150px;
     }
-}
 
+    /* Ensure callouts adjust on smaller screens */
+    .callout {
+        flex-direction: column;
+        padding: 1rem; /* Reduce padding for smaller screens */
+    }
+
+    .callout .icon {
+        margin-right: 0;
+        margin-bottom: 1rem; /* Add space below the icon */
+        align-self: flex-start; /* Align icon at the start */
+    }
+
+    .callout-content {
+        width: 100%;
+        padding: 0; /* Remove padding inside the content */
+    }
+}
 a {
     color: black; /* Accent color */
     text-decoration: none; /* No underline */
