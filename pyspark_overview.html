@@ -40,13 +40,13 @@
             <p><strong>This is by no means a full guide to PySpark</strong>. But it summarises all that lay at the basis of the troubles I had in the first year of getting started with PySpark.</p>
 
             <ol>
-                <li id="dfs-1"><strong>Dataframes in Pandas are not the same as Dataframes in PySpark.</strong>
-                    <p>The core structure - matrices (or nested arrays) in Pandas and SQL relational datatables in PySpark - is not the same. This has consequences. Setting up Dataframes is somewhat more sophisticated in PySpark. See <a href="pyspark_dataframes.html" >here</a>> for details.</p>
+                <li id="dfs-1"><a href="pyspark_dataframes.html" ><strong>Dataframes in Pandas are not the same as Dataframes in PySpark.</a></strong>
+                    <p>The core structure - matrices (or nested arrays) in Pandas and SQL relational datatables in PySpark - is not the same. This has consequences. Setting up Dataframes is somewhat more sophisticated in PySpark. See <a href="pyspark_dataframes.html" >here</a>for details.</p>
                 </li>
-                <li id="no-indices"><strong>PySpark won’t allow indices.</strong>
+                <li id="no-indices"><a href="pyspark_columns.html"><strong>PySpark won’t allow indices.</strong></a>
                     <p>This is the main painpoint. Extracting data from a dataframe once so intuitive in Pandas now requires a shift in approach that doesn’t rely on indices. Accessing Columns and Rows in SQL-think. See <a href="pyspark_columns.html">here</a> for details.</p>
                 </li>
-                <li id="pyspark-SQL-python"><strong>PySpark is SQL in Python.</strong>
+                <li id="pyspark-SQL-python"><a href="pyspark_filtering_1.html"><strong>PySpark is SQL in Python.</strong></a>
                     <p>If you’re vaguely familiar with SQL PySpark is absolutely awesome. You can do sophisticated filtering and joining in SQL style, while having the smooth pythonic display and saving of intermediate results (say goodbye to view-temporary-table) and extensive calculation capabilities. Click <a href="pyspark_filtering_1.html">here</a> for an introduction or see <a href="pyspark_taming_the_beast.html">this</a> for advanced filtering, where PySpark really shines.</p>
                 </li>
                 <!-- <li id="troubleshooting-1"><strong>Troubleshooting essentials.</strong>
